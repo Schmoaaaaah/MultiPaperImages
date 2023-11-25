@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  master:
+    build:
+      dockerfile: ./build/alpine/Dockerfile.master
+    container_name: master
+    ports:
+      - 35353:35353
+      - 25565:25565
+    volumes:
+      - ./data/master:/multipaper/data
+  server1:
+    build:
+      dockerfile: ./build/alpine/Dockerfile.server
+    container_name: server1
+    ports:
+      - 25566:25566
+    volumes:
+      - ./data/server1:/multipaper/data
+    depends_on:
+      - master
+  server2:
+    build:
+      dockerfile: ./build/alpine/Dockerfile.server
+    container_name: server2
+    ports:
+      - 25567:25567
+    volumes:
+      - ./data/server2:/multipaper/data
+    depends_on:
+      - master
