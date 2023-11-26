@@ -3,16 +3,35 @@ version: "3.7"
 services:
   master:
     build:
-      dockerfile: ./build/alpine/Dockerfile.master
+      dockerfile: ./build/ubuntu/Dockerfile
+      target: master
+      args:
+        RELEASE_URL: https://api.multipaper.io/v2/projects/multipaper/versions/1.20.1/builds/11/downloads/multipaper-master-2.11.0-all.jar
     container_name: master
     ports:
       - 35353:35353
       - 25565:25565
     volumes:
       - ./data/master:/multipaper/data
+  velocity:
+    build:
+      dockerfile: ./build/ubuntu/Dockerfile
+      target: velocity
+      args:
+        RELEASE_URL: https://api.papermc.io/v2/projects/velocity/versions/3.2.0-SNAPSHOT/builds/294/downloads/velocity-3.2.0-SNAPSHOT-294.jar
+    container_name: velocity
+    ports:
+      - 25577:25577
+    volumes:
+      - ./data/velocity:/multipaper/data
+    depends_on:
+      - master
   server1:
     build:
-      dockerfile: ./build/alpine/Dockerfile.server
+      dockerfile: ./build/ubuntu/Dockerfile
+      target: server
+      args:
+        RELEASE_URL: https://api.multipaper.io/v2/projects/multipaper/versions/1.20.1/builds/11/downloads/multipaper-1.20.1-11.jar
     container_name: server1
     ports:
       - 25566:25566
@@ -22,7 +41,10 @@ services:
       - master
   server2:
     build:
-      dockerfile: ./build/alpine/Dockerfile.server
+      dockerfile: ./build/ubuntu/Dockerfile
+      target: server
+      args:
+        RELEASE_URL: https://api.multipaper.io/v2/projects/multipaper/versions/1.20.1/builds/11/downloads/multipaper-1.20.1-11.jar
     container_name: server2
     ports:
       - 25567:25567

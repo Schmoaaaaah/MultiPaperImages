@@ -1,0 +1,31 @@
+name: Build from Releases
+
+on:
+  schedule:
+    - cron: "0 12 * * *" # Midnight AEST
+  workflow_dispatch:
+
+jobs:
+  build_1-20:
+    name: Build Release 1.20
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.20"
+      velocityversion: "3.2.0-SNAPSHOT"
+    secrets: inherit
+
+  build_1-19:
+    name: Build Release 1.19
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.19"
+      velocityversion: "3.1.2-SNAPSHOT"
+    secrets: inherit
+
+  build_1-18:
+    name: Build release 1.18
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.18"
+      velocityversion: "3.1.1"
+    secrets: inherit

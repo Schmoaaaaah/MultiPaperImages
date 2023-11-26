@@ -1,0 +1,121 @@
+name: Build from Release
+
+on:
+  workflow_call:
+    inputs:
+      velocityversion:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+
+jobs:
+  build_release:
+    name: Build image from release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: amd64,arm64,arm
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Release URL
+        id: get_release
+        run: |
+          RELEASE="$(curl -s "https://multipaper.io/api/v2/projects/multipaper/version_group/${{ inputs.version }}/builds" | sed 's/\\n//g' | jq '.builds[-1]')"
+          VELOCITY_RELEASE="$(curl -s "https://api.papermc.io/v2/projects/velocity/versions/${{ inputs.velocityversion }}/builds" | sed 's/\\n//g' | jq '.builds[-1]')"
+          VERSION="$(echo "$RELEASE" | jq -r '.version')"
+          VELOCITY_VERSION="$(curl -s "https://api.papermc.io/v2/projects/velocity/versions/3.2.0-SNAPSHOT/builds" | sed 's/\\n//g' | jq '.version')"
+          BUILD="$(echo "$RELEASE" | jq -r '.build')"
+          VELOCITY_BUILD="$(echo "$VELOCITY_RELEASE" | jq -r '.build')"
+          MULTIPAPER="$(echo "$RELEASE" | jq -r '.downloads.application.name')"
+          MULTIPAPER_MASTER="$(echo "$RELEASE" | jq -r '.downloads.master.name')"
+          VELOCITY="$(echo "$VELOCITY_RELEASE" | jq -r '.downloads.application.name')"
+          echo "MULTIPAPER_URL=$(echo "https://multipaper.io/api/v2/projects/multipaper/versions/$VERSION/builds/$BUILD/downloads/$MULTIPAPER")" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_MASTER_URL=$(echo "https://multipaper.io/api/v2/projects/multipaper/versions/$VERSION/builds/$BUILD/downloads/$MULTIPAPER_MASTER")" >> $GITHUB_OUTPUT
+          echo "VELOCITY_URL=$(echo "https://api.papermc.io/v2/projects/velocity/versions/$VELOCITY_VERSION/builds/$VELOCITY_BUILD/downloads/$VELOCITY")" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_SERVER_TAGS=schmoaaaaah/multipaper-server:$VERSION-$BUILD" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_MASTER_TAGS=schmoaaaaah/multipaper-master:$VERSION-$BUILD" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_VELOCITY_TAGS=schmoaaaaah/multipaper-velocity:$VELOCITY_VERSION-$VELOCITY_BUILD" >> $GITHUB_OUTPUT
+
+      - name: Build base image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: build/ubuntu/Dockerfile
+          push: false
+          load: false
+          target: base
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: |
+            type=gha,scope=release-base
+          cache-to: |
+            type=gha,scope=release-base,mode=max
+
+      - name: Build multipaper-master ${{ inputs.version }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: build/ubuntu/Dockerfile
+          push: true
+          tags: ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
+          target: master
+          build-args: |
+            RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_MASTER_URL }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: |
+            type=gha,scope=release-master-${{ inputs.version }}
+            type=gha,scope=release-base
+          cache-to: |
+            type=gha,scope=release-master-${{ inputs.version }},mode=max
+
+      - name: Build multipaper ${{ inputs.version }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: build/ubuntu/Dockerfile
+          push: true
+          tags: ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
+          target: server
+          build-args: |
+            RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_URL }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: |
+            type=gha,scope=release-server-${{ inputs.version }}
+            type=gha,scope=release-base
+          cache-to: |
+            type=gha,scope=release-server-${{ inputs.version }},mode=max
+
+      - name: Build multipaper-velocity ${{ inputs.velocityversion }} image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: build/ubuntu/Dockerfile
+          push: true
+          tags: ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
+          target: velocity
+          build-args: |
+            RELEASE_URL=${{ steps.get_release.outputs.VELOCITY_URL }}
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          cache-from: |
+            type=gha,scope=release-server-${{ inputs.velocityversion }}
+            type=gha,scope=release-base
+          cache-to: |
+            type=gha,scope=release-server-${{ inputs.velocityversion }},mode=max
