@@ -59,7 +59,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: build/alpine/Dockerfile
+          file: build/ubuntu/Dockerfile
           push: false
           load: false
           target: base
