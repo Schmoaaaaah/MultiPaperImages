@@ -51,9 +51,9 @@ jobs:
           echo "MULTIPAPER_URL=$(echo "https://multipaper.io/api/v2/projects/multipaper/versions/$VERSION/builds/$BUILD/downloads/$MULTIPAPER")" >> $GITHUB_OUTPUT
           echo "MULTIPAPER_MASTER_URL=$(echo "https://multipaper.io/api/v2/projects/multipaper/versions/$VERSION/builds/$BUILD/downloads/$MULTIPAPER_MASTER")" >> $GITHUB_OUTPUT
           echo "VELOCITY_URL=$(echo "https://api.papermc.io/v2/projects/velocity/versions/$VELOCITY_VERSION/builds/$VELOCITY_BUILD/downloads/$VELOCITY")" >> $GITHUB_OUTPUT
-          echo "MULTIPAPER_SERVER_TAGS=schmoaaaaah/multipaper-server:$VERSION-$BUILD" >> $GITHUB_OUTPUT
-          echo "MULTIPAPER_MASTER_TAGS=schmoaaaaah/multipaper-master:$VERSION-$BUILD" >> $GITHUB_OUTPUT
-          echo "MULTIPAPER_VELOCITY_TAGS=schmoaaaaah/multipaper-velocity:$VELOCITY_VERSION-$VELOCITY_BUILD" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_SERVER_TAGS=ghcr.io/schmoaaaaah/multipaper-server:$VERSION-$BUILD" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_MASTER_TAGS=ghcr.io/schmoaaaaah/multipaper-master:$VERSION-$BUILD" >> $GITHUB_OUTPUT
+          echo "MULTIPAPER_VELOCITY_TAGS=ghcr.io/schmoaaaaah/multipaper-velocity:$VELOCITY_VERSION-$VELOCITY_BUILD" >> $GITHUB_OUTPUT
 
       - name: Build base image
         uses: docker/build-push-action@v5
@@ -77,7 +77,9 @@ jobs:
           file: build/ubuntu/Dockerfile
           provenance: false
           push: true
-          tags: ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
+          tags: |
+            ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
+            ghcr.io/schmoaaaaah/multipaper-master:latest
           target: master
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_MASTER_URL }}
@@ -95,7 +97,9 @@ jobs:
           file: build/ubuntu/Dockerfile
           provenance: false
           push: true
-          tags: ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
+          tags: |
+            ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
+            ghcr.io/schmoaaaaah/multipaper-server:latest
           target: server
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_URL }}
@@ -113,7 +117,9 @@ jobs:
           file: build/ubuntu/Dockerfile
           provenance: false
           push: true
-          tags: ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
+          tags: |
+            ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
+            ghcr.io/schmoaaaaah/multipaper-velocity:latest
           target: velocity
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.VELOCITY_URL }}
