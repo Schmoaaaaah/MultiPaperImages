@@ -60,12 +60,11 @@ jobs:
         with:
           context: .
           file: build/ubuntu/Dockerfile
-          platforms: linux/amd64,linux/arm64
           provenance: false
           push: false
           load: false
           target: base
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: |
             type=gha,scope=release-base
           cache-to: |
@@ -76,14 +75,13 @@ jobs:
         with:
           context: .
           file: build/ubuntu/Dockerfile
-          platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
           tags: ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
           target: master
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_MASTER_URL }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: |
             type=gha,scope=release-master-${{ inputs.version }}
             type=gha,scope=release-base
@@ -95,14 +93,13 @@ jobs:
         with:
           context: .
           file: build/ubuntu/Dockerfile
-          platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
           tags: ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
           target: server
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_URL }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: |
             type=gha,scope=release-server-${{ inputs.version }}
             type=gha,scope=release-base
@@ -114,14 +111,13 @@ jobs:
         with:
           context: .
           file: build/ubuntu/Dockerfile
-          platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
           tags: ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
           target: velocity
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.VELOCITY_URL }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: |
             type=gha,scope=release-server-${{ inputs.velocityversion }}
             type=gha,scope=release-base
