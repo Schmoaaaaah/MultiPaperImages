@@ -12,6 +12,7 @@ jobs:
     with:
       version: "1.20"
       velocityversion: "3.2.0-SNAPSHOT"
+      latest: true
     secrets: inherit
 
   build_1-19:

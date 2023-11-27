@@ -9,6 +9,9 @@ on:
       version:
         required: true
         type: string
+      latest:
+        required: false
+        type: boolean
 
 jobs:
   build_release:
@@ -79,7 +82,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
-            ghcr.io/schmoaaaaah/multipaper-master:latest
+            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-master:latest' }}
           target: master
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_MASTER_URL }}
@@ -99,7 +102,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
-            ghcr.io/schmoaaaaah/multipaper-server:latest
+            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-server:latest' }}
           target: server
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_URL }}
@@ -119,7 +122,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
-            ghcr.io/schmoaaaaah/multipaper-velocity:latest
+            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-velocity:latest' }}
           target: velocity
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.VELOCITY_URL }}
