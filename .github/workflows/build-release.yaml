@@ -42,7 +42,7 @@ jobs:
           RELEASE="$(curl -s "https://multipaper.io/api/v2/projects/multipaper/version_group/${{ inputs.version }}/builds" | sed 's/\\n//g' | jq '.builds[-1]')"
           VELOCITY_RELEASE="$(curl -s "https://api.papermc.io/v2/projects/velocity/versions/${{ inputs.velocityversion }}/builds" | sed 's/\\n//g' | jq '.builds[-1]')"
           VERSION="$(echo "$RELEASE" | jq -r '.version')"
-          VELOCITY_VERSION="$(curl -s "https://api.papermc.io/v2/projects/velocity/versions/3.2.0-SNAPSHOT/builds" | sed 's/\\n//g' | jq '.version')"
+          VELOCITY_VERSION="$(curl -s "https://api.papermc.io/v2/projects/velocity/versions/${{ inputs.velocityversion }}/builds" | sed 's/\\n//g' | jq '.version' | sed 's/"//g')"
           BUILD="$(echo "$RELEASE" | jq -r '.build')"
           VELOCITY_BUILD="$(echo "$VELOCITY_RELEASE" | jq -r '.build')"
           MULTIPAPER="$(echo "$RELEASE" | jq -r '.downloads.application.name')"
