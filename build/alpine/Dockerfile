@@ -1,30 +1,12 @@
-# Example of custom Java runtime using jlink in a multi-stage container build
-FROM ibm-semeru-runtimes:open-17-jdk-jammy as java-runtime
-
-RUN export DEBIAN_FRONTEND=noninteractive && \
-    apt-get update && \
-    apt-get install -yq --no-install-recommends binutils && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create a custom Java runtime
-RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base,java.compiler,java.logging,java.management,java.scripting,java.net.http,java.sql,java.desktop,java.security.sasl,java.naming,java.transaction.xa,java.xml,jdk.crypto.ec,jdk.zipfs,jdk.security.auth,jdk.unsupported \
-         --strip-debug \
-         --no-man-pages \
-         --no-header-files \
-         --compress=2 \
-         --output /javaruntime
-
 # Define your base image
-FROM ubuntu:jammy as base
+FROM alpine:3.18.5 as base
 ENV JAVA_HOME=/opt/java/openjdk
-COPY --from=java-runtime /javaruntime $JAVA_HOME
+COPY --from=eclipse-temurin:17-alpine $JAVA_HOME $JAVA_HOME
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 
 # Setup groups and install dumb init
-RUN addgroup --gid 1001 multipaper && \
-    adduser --home /multipaper --uid 1001 -gid 1001 multipaper && \
+RUN addgroup -g 1001 multipaper && \
+    adduser -D -h /multipaper --u 1001 -G multipaper multipaper && \
     chown -R 1001:1001 /opt/java && \
     chmod -R 777 /opt/java && \
     chmod +x $JAVA_HOME/bin/java
