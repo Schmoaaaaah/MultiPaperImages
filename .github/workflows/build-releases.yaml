@@ -6,27 +6,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_1-20:
+  build_1-20_ubuntu:
     name: Build Release 1.20
     uses: ./.github/workflows/build-release.yaml
     with:
       version: "1.20"
       velocityversion: "3.2.0-SNAPSHOT"
       latest: true
+      OS: "ubuntu"
     secrets: inherit
 
-  build_1-19:
+  build_1-19_ubuntu:
     name: Build Release 1.19
     uses: ./.github/workflows/build-release.yaml
     with:
       version: "1.19"
       velocityversion: "3.1.2-SNAPSHOT"
+      OS: "ubuntu"
     secrets: inherit
 
-  build_1-18:
+  build_1-18_ubuntu:
     name: Build release 1.18
     uses: ./.github/workflows/build-release.yaml
     with:
       version: "1.18"
       velocityversion: "3.1.1"
+      OS: "ubuntu"
+    secrets: inherit
+
+  build_1-20_alpine:
+    name: Build Release 1.20
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.20"
+      velocityversion: "3.2.0-SNAPSHOT"
+      latest: true
+      OS: "alpine"
+    secrets: inherit
+
+  build_1-19_alpine:
+    name: Build Release 1.19
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.19"
+      velocityversion: "3.1.2-SNAPSHOT"
+      OS: "alpine"
+    secrets: inherit
+
+  build_1-18_alpine:
+    name: Build release 1.18
+    uses: ./.github/workflows/build-release.yaml
+    with:
+      version: "1.18"
+      velocityversion: "3.1.1"
+      OS: "alpine"
     secrets: inherit

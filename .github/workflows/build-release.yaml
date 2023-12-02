@@ -9,6 +9,9 @@ on:
       version:
         required: true
         type: string
+      OS:
+        required: true
+        type: string
       latest:
         required: false
         type: boolean
@@ -58,77 +61,83 @@ jobs:
           echo "MULTIPAPER_MASTER_TAGS=ghcr.io/schmoaaaaah/multipaper-master:$VERSION-$BUILD" >> $GITHUB_OUTPUT
           echo "MULTIPAPER_VELOCITY_TAGS=ghcr.io/schmoaaaaah/multipaper-velocity:$VELOCITY_VERSION-$VELOCITY_BUILD" >> $GITHUB_OUTPUT
 
-      - name: Build base image
+      - name: Build base image ${{ inputs.OS }}
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: build/ubuntu/Dockerfile
+          file: build/${{ inputs.OS }}/Dockerfile
           provenance: false
           push: false
           load: false
           target: base
           platforms: linux/amd64,linux/arm64
           cache-from: |
-            type=gha,scope=release-base
+            type=gha,scope=release-base-${{ inputs.OS }}
           cache-to: |
-            type=gha,scope=release-base,mode=max
+            type=gha,scope=release-base-${{ inputs.OS }},mode=max
 
-      - name: Build multipaper-master ${{ inputs.version }} image
+      - name: Build multipaper-master ${{ inputs.version }} ${{ inputs.OS }} image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: build/ubuntu/Dockerfile
+          file: build/${{ inputs.OS }}/Dockerfile
           provenance: false
           push: true
           tags: |
-            ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}
-            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-master:latest' || '' }}
+            ${{ steps.get_release.outputs.MULTIPAPER_MASTER_TAGS }}-${{ inputs.OS }}
+            ${{ inputs.latest == true && format('ghcr.io/schmoaaaaah/multipaper-master:latest-{0}', inputs.OS) || '' }}
+            ${{ inputs.latest == true && inputs.OS == 'ubuntu' && 'ghcr.io/schmoaaaaah/multipaper-master:latest' || '' }}
+            ${{ inputs.OS == 'ubuntu' && steps.get_release.outputs.MULTIPAPER_MASTER_TAGS || '' }}
           target: master
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_MASTER_URL }}
           platforms: linux/amd64,linux/arm64
           cache-from: |
-            type=gha,scope=release-master-${{ inputs.version }}
-            type=gha,scope=release-base
+            type=gha,scope=release-master-${{ inputs.version }}-${{ inputs.OS }}
+            type=gha,scope=release-base-${{ inputs.OS }}
           cache-to: |
-            type=gha,scope=release-master-${{ inputs.version }},mode=max
+            type=gha,scope=release-master-${{ inputs.version }}-${{ inputs.OS }},mode=max
 
-      - name: Build multipaper ${{ inputs.version }} image
+      - name: Build multipaper ${{ inputs.version }} ${{ inputs.OS }} image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: build/ubuntu/Dockerfile
+          file: build/${{ inputs.OS }}/Dockerfile
           provenance: false
           push: true
           tags: |
-            ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}
-            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-server:latest' || '' }}
+            ${{ steps.get_release.outputs.MULTIPAPER_SERVER_TAGS }}-${{ inputs.OS }}
+            ${{ inputs.latest == true && format('ghcr.io/schmoaaaaah/multipaper-server:latest-{0}', inputs.OS) || '' }}
+            ${{ inputs.latest == true && inputs.OS == 'ubuntu' && 'ghcr.io/schmoaaaaah/multipaper-server:latest' || '' }}
+            ${{ inputs.OS == 'ubuntu' && steps.get_release.outputs.MULTIPAPER_SERVER_TAGS || '' }}
           target: server
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.MULTIPAPER_URL }}
           platforms: linux/amd64,linux/arm64
           cache-from: |
-            type=gha,scope=release-server-${{ inputs.version }}
-            type=gha,scope=release-base
+            type=gha,scope=release-server-${{ inputs.version }}-${{ inputs.OS }}
+            type=gha,scope=release-base-${{ inputs.OS }}
           cache-to: |
-            type=gha,scope=release-server-${{ inputs.version }},mode=max
+            type=gha,scope=release-server-${{ inputs.version }}-${{ inputs.OS }},mode=max
 
-      - name: Build multipaper-velocity ${{ inputs.velocityversion }} image
+      - name: Build multipaper-velocity ${{ inputs.velocityversion }} ${{ inputs.OS }} image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: build/ubuntu/Dockerfile
+          file: build/${{ inputs.OS }}/Dockerfile
           provenance: false
           push: true
           tags: |
-            ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}
-            ${{ inputs.latest == true && 'ghcr.io/schmoaaaaah/multipaper-velocity:latest' || '' }}
+            ${{ steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS }}-${{ inputs.OS }}
+            ${{ inputs.latest == true && format('ghcr.io/schmoaaaaah/multipaper-velocity:latest-{0}', inputs.OS) || '' }}
+            ${{ inputs.latest == true && inputs.OS == 'ubuntu' && 'ghcr.io/schmoaaaaah/multipaper-velocity:latest' || '' }}
+            ${{ inputs.OS == 'ubuntu' && steps.get_release.outputs.MULTIPAPER_VELOCITY_TAGS || '' }}
           target: velocity
           build-args: |
             RELEASE_URL=${{ steps.get_release.outputs.VELOCITY_URL }}
           platforms: linux/amd64,linux/arm64
           cache-from: |
-            type=gha,scope=release-server-${{ inputs.velocityversion }}
-            type=gha,scope=release-base
+            type=gha,scope=release-server-${{ inputs.velocityversion }}-${{ inputs.OS }}
+            type=gha,scope=release-base-${{ inputs.OS }}
           cache-to: |
-            type=gha,scope=release-server-${{ inputs.velocityversion }},mode=max
+            type=gha,scope=release-server-${{ inputs.velocityversion }}-${{ inputs.OS }},mode=max
