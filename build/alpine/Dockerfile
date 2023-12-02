@@ -1,7 +1,7 @@
 # Define your base image
 FROM alpine:3.18.5 as base
 ENV JAVA_HOME=/opt/java/openjdk
-COPY --from=eclipse-temurin:17-alpine $JAVA_HOME $JAVA_HOME
+COPY --from=azul/zulu-openjdk-alpine:17 /usr/lib/jvm/zulu17 $JAVA_HOME
 ENV PATH "${JAVA_HOME}/bin:${PATH}"
 
 # Setup groups and install dumb init
